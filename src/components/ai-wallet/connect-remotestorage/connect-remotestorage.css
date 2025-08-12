@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+.rs-widget {
+  box-shadow: none !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+}
