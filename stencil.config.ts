@@ -10,21 +10,9 @@ setPluginConfigurationDefaults({
 });
 
 export const config: Config = {
-  namespace: "stencil-component-example",
+  namespace: "ai-wallet",
   outputTargets: [
-    {
-      type: "dist",
-      /* esmLoaderPath: '../loader',*/
-    },
-    {
-      type: "docs-readme",
-    },
-    {
-      type: "www",
-      serviceWorker: null, // disable service workers
-      baseUrl: "https://poimen.github.io/",
-      dir: "docs",
-    },
+    { type: "dist" }
   ],
   plugins: [tailwind(), tailwindHMR()],
 };
