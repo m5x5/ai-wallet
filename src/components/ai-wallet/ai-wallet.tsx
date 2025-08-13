@@ -449,13 +449,13 @@ export class AIWallet {
     return (
       <Host>
         <div
-          class={`flex flex-col items-center justify-between px-4 py-8 mb-4 bg-white rounded-md shadow-lg w-full max-w-5xl @container`}
+          class={`flex flex-col items-center justify-between px-4 mb-4 bg-white dark:bg-zinc-900 dark:text-zinc-100 rounded-md shadow-lg w-full max-w-5xl @container`}
         >
           <div class="flex flex-col items-center space-y-8">
             <div class="w-full">
               <div class="mt-4 space-y-4 animate-fadeIn">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2 flex items-center justify-between">
                     API Endpoint
                     <button
                       type="button"
@@ -463,7 +463,7 @@ export class AIWallet {
                         this.endpoint = "https://server.budecredits.de/";
                         this.onEndpointOrKeyChange();
                       }}
-                      class="text-xs text-blue-600 hover:text-blue-800 focus:outline-none focus:underline"
+                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:underline"
                     >
                       Reset to default endpoint
                     </button>
@@ -475,17 +475,17 @@ export class AIWallet {
                       this.endpoint = (e.target as HTMLInputElement).value;
                       this.onEndpointOrKeyChange();
                     }}
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
                     placeholder="https://server.budecredits.de/"
                   />
-                  <p class="mt-1 text-xs text-gray-500">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
                     {this.models.length}{" "}
                     AI models loaded from {this.endpoint}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     API Key
                   </label>
                   <input
@@ -495,10 +495,10 @@ export class AIWallet {
                       this.apiKey = (e.target as HTMLInputElement).value;
                       this.onEndpointOrKeyChange();
                     }}
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
                     placeholder="Enter your API key"
                   />
-                  <p class="mt-1 text-xs text-gray-500">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
                     Your API key for authentication
                   </p>
                 </div>
@@ -506,14 +506,14 @@ export class AIWallet {
             </div>
 
             {this.modelsError && (
-              <div class="flex items-center space-x-2 text-red-600 text-sm bg-red-50 px-3 py-2 rounded-md">
+              <div class="flex items-center space-x-2 text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-950 px-3 py-2 rounded-md dark:border dark:border-red-900/30">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM13 17h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
                 <span>Models error: {this.modelsError}</span>
                 <button
                   onClick={() => this.loadModels()}
-                  class="ml-2 text-red-800 hover:text-red-900 underline text-xs"
+                  class="ml-2 text-red-800 hover:text-red-900 dark:text-red-300 dark:hover:text-red-200 underline text-xs"
                 >
                   Retry
                 </button>
@@ -533,15 +533,15 @@ export class AIWallet {
                 return (
                   <div
                     key={capability.id}
-                    class={`flex flex-col p-4 rounded-lg border border-gray-200`}
+                    class={`flex flex-col p-4 rounded-lg border border-gray-200 dark:border-zinc-700`}
                   >
                     <div class="flex items-center justify-between mb-2">
-                      <h3 class={`font-medium`}>{capability.title}</h3>
+                      <h3 class={`font-medium dark:text-zinc-100`}>{capability.title}</h3>
                       {!isEnabled && (
                         <button
                           type="button"
                           onClick={() => onEnableCapability(capability.id)}
-                          class="flex items-center justify-center w-6 h-6 rounded-full text-white bg-primary-600 hover:bg-gray-300 focus-visible:ring focus-visible:ring-offset-2 focus:outline-none focus-visible:ring-primary-600 hover:text-gray-700 transition-colors"
+                          class="flex items-center justify-center w-6 h-6 rounded-full text-white bg-primary-600 hover:bg-gray-300 dark:hover:bg-zinc-700 focus-visible:ring focus-visible:ring-offset-2 focus:outline-none focus-visible:ring-primary-600 hover:text-gray-700 dark:hover:text-zinc-100 transition-colors"
                           aria-label={lang === "en" ? "Aktivieren" : "Enable"}
                         >
                           <svg
@@ -560,7 +560,7 @@ export class AIWallet {
                         </button>
                       )}
                     </div>
-                    <p class="text-sm text-gray-500 mt-1">
+                    <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">
                       {capability.description}
                     </p>
 
@@ -574,7 +574,7 @@ export class AIWallet {
                                 ? null
                                 : capability.id;
                           }}
-                          class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 w-full border border-gray-200"
+                          class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors duration-200 w-full border border-gray-200 dark:border-zinc-700 dark:text-zinc-100"
                         >
                           <span class="text-sm">
                             {selectedModel
@@ -584,7 +584,7 @@ export class AIWallet {
                         </button>
 
                         {this.showModelSelector === capability.id && (
-                          <div class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 border border-gray-200">
+                          <div class="absolute z-10 mt-1 w-full bg-white dark:bg-zinc-900 shadow-lg rounded-md py-1 border border-gray-200 dark:border-zinc-700">
                             {availableModels.map((model) => (
                               <button
                                 key={model.id}
@@ -593,10 +593,10 @@ export class AIWallet {
                                   onSelectModel(capability.id, model.id);
                                   this.showModelSelector = null;
                                 }}
-                                class={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
+                                class={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 ${
                                   selectedModel === model.id
-                                    ? "text-primary-600 bg-primary-50"
-                                    : "text-gray-700"
+                                    ? "text-primary-600 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30"
+                                    : "text-gray-700 dark:text-zinc-100"
                                 }`}
                               >
                                 {model.id}
@@ -610,8 +610,8 @@ export class AIWallet {
                 );
               })}
             </div>
-          </div>
             <connect-remotestorage rs={this.rs}></connect-remotestorage>
+          </div>
         </div>
       </Host>
     );

@@ -103,8 +103,7 @@ dist
 # TernJS port file
 .tern-port
 
-docs/
-
+.vitepress/
 dist/
 www/
 loader/
@@ -134,3 +133,4 @@ UserInterfaceState.xcuserstate
 
 *storybook.log
 storybook-static
+.vercel
