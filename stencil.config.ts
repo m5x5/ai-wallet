@@ -12,7 +12,14 @@ setPluginConfigurationDefaults({
 export const config: Config = {
   namespace: "ai-wallet",
   outputTargets: [
-    { type: "dist" }
+    { type: "dist-custom-elements",
+      customElementsExportBehavior: 'auto-define-custom-elements',
+      includeGlobalScripts: true,
+     },
+    /*{
+      type: "www",
+      serviceWorker: null,
+    }*/
   ],
   plugins: [tailwind(), tailwindHMR()],
 };

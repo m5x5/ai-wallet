@@ -1,6 +1,6 @@
 import { Component, Host, h, Prop, Element } from '@stencil/core';
-import { type RemoteStorage } from "remotestoragejs";
-import Widget from "remotestorage-widget";
+import {RemoteStorageWidget} from "remotestorage-widget";
+import "remotestorage-widget";
 
 @Component({
   tag: 'connect-remotestorage',
@@ -8,25 +8,24 @@ import Widget from "remotestorage-widget";
   shadow: true,
 })
 export class ConnectRemotestorage {
-  private widget: Widget;
-  @Prop() rs: RemoteStorage;
+  @Prop() rs: any;
   @Element() el: HTMLElement;
 
   componentDidLoad() {
-    this.widget = new Widget(this.rs, { logging: true, leaveOpen: true });
-    const rsWidget = this.el.shadowRoot.querySelector("#rs-widget");
+    const rsWidget = this.el.shadowRoot.querySelector("remotestorage-widget") as RemoteStorageWidget;
+    console.log(rsWidget);
 
-    if (rsWidget) {
-      this.widget.attach(rsWidget);
-    } else {
-      console.error("No rs-widget found");
-    }
+    rsWidget.setRemoteStorage(this.rs);
+    rsWidget.setOptions({
+      logging: true,
+      leaveOpen: true,
+    });
   }
 
   render() {
     return (
       <Host>
-        <div id="rs-widget"></div>
+        <remotestorage-widget open rs={this.rs}></remotestorage-widget>
       </Host>
     );
   }

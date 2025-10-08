@@ -1,5 +1,5 @@
 import DefaultTheme from 'vitepress/theme'
-import { defineCustomElements } from '../loader/index.js'
+import { defineCustomElements } from 'ai-wallet/loader'
 
 export default {
   ...DefaultTheme,

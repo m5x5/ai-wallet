@@ -9,6 +9,7 @@ import {
   State,
 } from "@stencil/core";
 import RemoteStorage from "remotestoragejs";
+import '@vaadin/vaadin-combo-box/vaadin-combo-box.js';
 
 export interface AIWalletConfig {
   endpoint?: string;
@@ -35,6 +36,59 @@ export interface InternalModel {
   name: string;
   capabilities: string[];
 }
+
+console.log(RemoteStorage);
+// Handle both CommonJS and ESM exports
+const rs = new (RemoteStorage as any)();
+rs.access.claim("ai-wallet", "rw");
+rs.on("connected", async () => {
+  const client = rs.scope("/ai-wallet/");
+  client.declareType("ai-wallet-config", {
+    type: "object",
+    properties: {
+      endpoint: {
+        type: "string",
+        format: "uri",
+        default: "https://server.budecredits.de/",
+      },
+      apiKey: {
+        type: "string",
+        default: "",
+      },
+      vlm: {
+        type: "string",
+        default: "vlm-1",
+      },
+      llm: {
+        type: "string",
+        default: "llm-1",
+      },
+      sst: {
+        type: "string",
+        default: "sst-1",
+      },
+      tts: {
+        type: "string",
+        default: "tts-1",
+      },
+      enabledCapabilities: {
+        type: "array",
+        items: { type: "string" },
+        default: ["llm", "vlm", "sst", "tts"],
+      },
+    },
+    required: [],
+  });
+  try {
+    const savedConfig = await client.getObject("config");
+    globalThis.savedConfig = savedConfig;
+    globalThis.configLoadComplete = true;
+  } catch (err) {
+    console.log("Error loading config from remote storage:", err);
+    globalThis.savedConfig = null;
+    globalThis.configLoadComplete = true;
+  }
+});
 
 @Component({
   tag: "ai-wallet",
@@ -66,6 +120,8 @@ export class AIWallet {
   @State()
   showModelSelector: string | null = null;
 
+  private comboBoxRefs: { [key: string]: any } = {};
+
   // Internal configuration state
   @State()
   endpoint: string = "https://server.budecredits.de/";
@@ -75,6 +131,10 @@ export class AIWallet {
   // Advanced config toggle state
   @State()
   showAdvancedConfig: boolean = false;
+
+  // Configuration loading state
+  @State()
+  configurationLoaded: boolean = false;
 
   // Dynamic models state
   @State()
@@ -88,68 +148,77 @@ export class AIWallet {
   @Event()
   configChanged: EventEmitter<AIWalletConfig>;
 
-  private rs: RemoteStorage;
+  private rs: any;
 
   componentWillLoad() {
-    this.rs = new RemoteStorage();
-    this.rs.access.claim("ai-wallet", "rw");
+    this.rs = rs;
 
-    // Load models initially
     this.loadModels();
 
     this.rs.on("connected", async () => {
-      const client = this.rs.scope("/ai-wallet/");
-      client.declareType("ai-wallet-config", {
-        type: "object",
-        properties: {
-          endpoint: {
-            type: "string",
-            format: "uri",
-            default: "https://server.budecredits.de/",
-          },
-          apiKey: {
-            type: "string",
-            default: "",
-          },
-          vlm: {
-            type: "string",
-            default: "vlm-1",
-          },
-          llm: {
-            type: "string",
-            default: "llm-1",
-          },
-          sst: {
-            type: "string",
-            default: "sst-1",
-          },
-          tts: {
-            type: "string",
-            default: "tts-1",
-          },
-          enabledCapabilities: {
-            type: "array",
-            items: { type: "string" },
-            default: ["llm", "vlm", "sst", "tts"],
-          },
-        },
-        required: [],
-      });
+      // Wait for the global config load to complete
+      await this.waitForConfigLoad();
 
-      // Try to load existing configuration
       try {
-        const savedConfig = await client.getObject("config");
-        if (savedConfig) {
-          console.log("Loading saved AI wallet configuration:", savedConfig);
-          this.loadConfigurationFromStorage(savedConfig);
+        if (globalThis.savedConfig) {
+          console.log(
+            "Loading saved AI wallet configuration:",
+            globalThis.savedConfig,
+          );
+          this.loadConfigurationFromStorage(globalThis.savedConfig);
         } else {
           console.log("No saved configuration found, using defaults");
           this.saveConfigurationToStorage();
         }
+        this.configurationLoaded = true;
       } catch (err) {
         console.log("Error loading configuration:", err);
         this.saveConfigurationToStorage();
+        this.configurationLoaded = true;
       }
+    });
+  }
+
+  componentDidRender() {
+    // Update combo box items after render
+    this.updateComboBoxItems();
+  }
+
+  private updateComboBoxItems() {
+    Object.keys(this.comboBoxRefs).forEach(capabilityId => {
+      const comboBox = this.comboBoxRefs[capabilityId];
+      if (comboBox) {
+        const availableModels = this.models.filter(m =>
+          m.capabilities.includes(capabilityId)
+        );
+        comboBox.items = availableModels.map(model => ({
+          id: model.id,
+          name: model.name
+        }));
+      }
+    });
+  }
+
+  private async waitForConfigLoad(): Promise<void> {
+    return new Promise((resolve) => {
+      if (globalThis.configLoadComplete) {
+        resolve();
+        return;
+      }
+
+      const checkInterval = setInterval(() => {
+        if (globalThis.configLoadComplete) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 50);
+
+      // Timeout after 5 seconds to avoid infinite waiting
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        globalThis.configLoadComplete = true;
+        resolve();
+      }, 5000);
     });
   }
 
@@ -190,11 +259,15 @@ export class AIWallet {
 
       // Validate and fix model selections after loading new models
       this.validateModelSelections();
+      // Update combo box items with new models
+      setTimeout(() => this.updateComboBoxItems(), 100);
     } catch (error) {
       console.error("Error loading models:", error);
       this.modelsError = error.message || "Failed to load models";
       this.models = this.getFallbackModels();
       this.validateModelSelections();
+      // Update combo box items even with fallback models
+      setTimeout(() => this.updateComboBoxItems(), 100);
     } finally {
       this.modelsLoading = false;
     }
@@ -234,38 +307,44 @@ export class AIWallet {
     // If the model explicitly has capabilities, use them
     if (model.capabilities && Array.isArray(model.capabilities)) {
       return model.capabilities.filter((cap) =>
-        ["llm", "vlm", "sst", "tts"].includes(cap.toLowerCase())
+        ["llm", "vlm", "sst", "tts"].includes(cap.toLowerCase()),
       );
     }
 
     // Infer capabilities from model name, type, or features
-    const modelInfo = `${model.id} ${model.type || ""} ${
-      (model.features || []).join(" ")
-    }`.toLowerCase();
+    const modelInfo = `${model.id} ${model.type || ""} ${(
+      model.features || []
+    ).join(" ")}`.toLowerCase();
 
     if (
-      modelInfo.includes("language") || modelInfo.includes("llm") ||
-      modelInfo.includes("chat") || modelInfo.includes("text")
+      modelInfo.includes("language") ||
+      modelInfo.includes("llm") ||
+      modelInfo.includes("chat") ||
+      modelInfo.includes("text")
     ) {
       capabilities.push("llm");
     }
 
     if (
-      modelInfo.includes("vision") || modelInfo.includes("vlm") ||
-      modelInfo.includes("image") || modelInfo.includes("visual")
+      modelInfo.includes("vision") ||
+      modelInfo.includes("vlm") ||
+      modelInfo.includes("image") ||
+      modelInfo.includes("visual")
     ) {
       capabilities.push("vlm");
     }
 
     if (
-      modelInfo.includes("speech") || modelInfo.includes("sst") ||
+      modelInfo.includes("speech") ||
+      modelInfo.includes("sst") ||
       modelInfo.includes("transcrib")
     ) {
       capabilities.push("sst");
     }
 
     if (
-      modelInfo.includes("tts") || modelInfo.includes("text-to-speech") ||
+      modelInfo.includes("tts") ||
+      modelInfo.includes("text-to-speech") ||
       modelInfo.includes("synthesis")
     ) {
       capabilities.push("tts");
@@ -382,8 +461,11 @@ export class AIWallet {
       enabledCapabilities: [...this.enabledCapabilities],
     });
 
-    // Save to RemoteStorage whenever configuration changes
-    this.saveConfigurationToStorage();
+    // Only save to RemoteStorage after initial configuration has been loaded
+    // to prevent overwriting the remote config during initialization
+    if (this.configurationLoaded) {
+      this.saveConfigurationToStorage();
+    }
   }
 
   private async onEndpointOrKeyChange() {
@@ -395,7 +477,6 @@ export class AIWallet {
 
   render() {
     const t = {
-      selectModel: "Select Model",
       capabilities: {
         llm: {
           title: "Language",
@@ -422,8 +503,6 @@ export class AIWallet {
       }
     }
 
-    // Use dynamic models from state
-    const models = this.models;
     const onEnableCapability = (capabilityId: string) => {
       this.enabledCapabilities = this.enabledCapabilities.includes(capabilityId)
         ? this.enabledCapabilities.filter((id) => id !== capabilityId)
@@ -455,7 +534,7 @@ export class AIWallet {
             <div class="w-full">
               <div class="mt-4 space-y-4 animate-fadeIn">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2 flex items-center justify-between">
+                  <label class="text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2 flex items-center justify-between">
                     API Endpoint
                     <button
                       type="button"
@@ -463,7 +542,7 @@ export class AIWallet {
                         this.endpoint = "https://server.budecredits.de/";
                         this.onEndpointOrKeyChange();
                       }}
-                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:underline"
+                      class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:underline"
                     >
                       Reset to default endpoint
                     </button>
@@ -475,17 +554,16 @@ export class AIWallet {
                       this.endpoint = (e.target as HTMLInputElement).value;
                       this.onEndpointOrKeyChange();
                     }}
-                      class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-800 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
                     placeholder="https://server.budecredits.de/"
                   />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
-                    {this.models.length}{" "}
-                    AI models loaded from {this.endpoint}
+                  <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+                    {this.models.length} AI models loaded from {this.endpoint}
                   </p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     API Key
                   </label>
                   <input
@@ -495,10 +573,10 @@ export class AIWallet {
                       this.apiKey = (e.target as HTMLInputElement).value;
                       this.onEndpointOrKeyChange();
                     }}
-                      class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-800 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-400"
                     placeholder="Enter your API key"
                   />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+                  <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
                     Your API key for authentication
                   </p>
                 </div>
@@ -526,9 +604,6 @@ export class AIWallet {
                   capability.id,
                 );
                 const selectedModel = this.selectedModels[capability.id];
-                const availableModels = models.filter((m) =>
-                  m.capabilities.includes(capability.id)
-                );
 
                 return (
                   <div
@@ -536,7 +611,9 @@ export class AIWallet {
                     class={`flex flex-col p-4 rounded-lg border border-gray-200 dark:border-zinc-700`}
                   >
                     <div class="flex items-center justify-between mb-2">
-                      <h3 class={`font-medium dark:text-zinc-100`}>{capability.title}</h3>
+                      <h3 class={`font-medium dark:text-zinc-100`}>
+                        {capability.title}
+                      </h3>
                       {!isEnabled && (
                         <button
                           type="button"
@@ -564,46 +641,26 @@ export class AIWallet {
                       {capability.description}
                     </p>
 
-                    {isEnabled && (
+                    {isEnabled && this.models.length > 0 && (
                       <div class="relative mt-4">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            this.showModelSelector =
-                              this.showModelSelector === capability.id
-                                ? null
-                                : capability.id;
+                        <vaadin-combo-box
+                          ref={(el: any) => this.comboBoxRefs[capability.id] = el}
+                          value={selectedModel}
+                          item-label-path="name"
+                          item-value-path="id"
+                          onValueChanged={(e: any) => {
+                            console.log(e);
+                            const newValue = e.detail.value;
+                            if (newValue) {
+                              onSelectModel(capability.id, newValue);
+                            }
                           }}
-                          class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors duration-200 w-full border border-gray-200 dark:border-zinc-700 dark:text-zinc-100"
-                        >
-                          <span class="text-sm">
-                            {selectedModel
-                              ? models.find((m) => m.id === selectedModel)?.name
-                              : t.selectModel}
-                          </span>
-                        </button>
-
-                        {this.showModelSelector === capability.id && (
-                          <div class="absolute z-10 mt-1 w-full bg-white dark:bg-zinc-900 shadow-lg rounded-md py-1 border border-gray-200 dark:border-zinc-700">
-                            {availableModels.map((model) => (
-                              <button
-                                key={model.id}
-                                type="button"
-                                onClick={() => {
-                                  onSelectModel(capability.id, model.id);
-                                  this.showModelSelector = null;
-                                }}
-                                class={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 ${
-                                  selectedModel === model.id
-                                    ? "text-primary-600 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30"
-                                    : "text-gray-700 dark:text-zinc-100"
-                                }`}
-                              >
-                                {model.id}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                          style={{
+                            '--vaadin-input-field-border-color': '#d1d5db',
+                            '--vaadin-input-field-background': 'white',
+                            'width': '100%'
+                          }}
+                        ></vaadin-combo-box>
                       </div>
                     )}
                   </div>

@@ -6,9 +6,7 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { AIWalletConfig } from "./components/ai-wallet/ai-wallet";
-import { RemoteStorage } from "remotestoragejs";
 export { AIWalletConfig } from "./components/ai-wallet/ai-wallet";
-export { RemoteStorage } from "remotestoragejs";
 export namespace Components {
     interface AiWallet {
         /**
@@ -26,17 +24,7 @@ export namespace Components {
         "sync": boolean;
     }
     interface ConnectRemotestorage {
-        "rs": RemoteStorage;
-    }
-    interface DemoSection {
-    }
-    interface FooterNav {
-    }
-    interface HeroSection {
-    }
-    interface MainApp {
-    }
-    interface TopNavBar {
+        "rs": any;
     }
 }
 export interface AiWalletCustomEvent<T> extends CustomEvent<T> {
@@ -67,44 +55,9 @@ declare global {
         prototype: HTMLConnectRemotestorageElement;
         new (): HTMLConnectRemotestorageElement;
     };
-    interface HTMLDemoSectionElement extends Components.DemoSection, HTMLStencilElement {
-    }
-    var HTMLDemoSectionElement: {
-        prototype: HTMLDemoSectionElement;
-        new (): HTMLDemoSectionElement;
-    };
-    interface HTMLFooterNavElement extends Components.FooterNav, HTMLStencilElement {
-    }
-    var HTMLFooterNavElement: {
-        prototype: HTMLFooterNavElement;
-        new (): HTMLFooterNavElement;
-    };
-    interface HTMLHeroSectionElement extends Components.HeroSection, HTMLStencilElement {
-    }
-    var HTMLHeroSectionElement: {
-        prototype: HTMLHeroSectionElement;
-        new (): HTMLHeroSectionElement;
-    };
-    interface HTMLMainAppElement extends Components.MainApp, HTMLStencilElement {
-    }
-    var HTMLMainAppElement: {
-        prototype: HTMLMainAppElement;
-        new (): HTMLMainAppElement;
-    };
-    interface HTMLTopNavBarElement extends Components.TopNavBar, HTMLStencilElement {
-    }
-    var HTMLTopNavBarElement: {
-        prototype: HTMLTopNavBarElement;
-        new (): HTMLTopNavBarElement;
-    };
     interface HTMLElementTagNameMap {
         "ai-wallet": HTMLAiWalletElement;
         "connect-remotestorage": HTMLConnectRemotestorageElement;
-        "demo-section": HTMLDemoSectionElement;
-        "footer-nav": HTMLFooterNavElement;
-        "hero-section": HTMLHeroSectionElement;
-        "main-app": HTMLMainAppElement;
-        "top-nav-bar": HTMLTopNavBarElement;
     }
 }
 declare namespace LocalJSX {
@@ -122,26 +75,11 @@ declare namespace LocalJSX {
         "sync"?: boolean;
     }
     interface ConnectRemotestorage {
-        "rs"?: RemoteStorage;
-    }
-    interface DemoSection {
-    }
-    interface FooterNav {
-    }
-    interface HeroSection {
-    }
-    interface MainApp {
-    }
-    interface TopNavBar {
+        "rs"?: any;
     }
     interface IntrinsicElements {
         "ai-wallet": AiWallet;
         "connect-remotestorage": ConnectRemotestorage;
-        "demo-section": DemoSection;
-        "footer-nav": FooterNav;
-        "hero-section": HeroSection;
-        "main-app": MainApp;
-        "top-nav-bar": TopNavBar;
     }
 }
 export { LocalJSX as JSX };
@@ -150,11 +88,6 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "ai-wallet": LocalJSX.AiWallet & JSXBase.HTMLAttributes<HTMLAiWalletElement>;
             "connect-remotestorage": LocalJSX.ConnectRemotestorage & JSXBase.HTMLAttributes<HTMLConnectRemotestorageElement>;
-            "demo-section": LocalJSX.DemoSection & JSXBase.HTMLAttributes<HTMLDemoSectionElement>;
-            "footer-nav": LocalJSX.FooterNav & JSXBase.HTMLAttributes<HTMLFooterNavElement>;
-            "hero-section": LocalJSX.HeroSection & JSXBase.HTMLAttributes<HTMLHeroSectionElement>;
-            "main-app": LocalJSX.MainApp & JSXBase.HTMLAttributes<HTMLMainAppElement>;
-            "top-nav-bar": LocalJSX.TopNavBar & JSXBase.HTMLAttributes<HTMLTopNavBarElement>;
         }
     }
 }
