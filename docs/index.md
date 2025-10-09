@@ -10,6 +10,9 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
+      text: React Guide
+      link: /guide/react-integration
+    - theme: alt
       text: GitHub
       link: https://github.com/m5x5/llm-wallet
 features:
@@ -19,6 +22,12 @@ features:
     details: Integrates with RemoteStorage so users control their data.
   - title: Provider Agnostic
     details: Works with any AI provider setup.
+  - title: React Integration
+    details: Full React support with hooks, context, and custom placement options.
+  - title: Customizable
+    details: Choose between floating or embedded placement, shadow or border styling.
+  - title: TypeScript Support
+    details: Fully typed components and hooks for great developer experience.
 ---
 
 <ClientOnly>

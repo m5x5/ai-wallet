@@ -1,18 +1,41 @@
 {
   "name": "ai-wallet",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "description": "AI Wallet",
-  "module": "dist/components/ai-wallet.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./loader": {
+      "import": "./loader/index.js",
+      "require": "./loader/index.cjs.js"
+    },
+    "./react": {
+      "types": "./src/react/index.ts",
+      "import": "./src/react/index.ts"
+    }
+  },
   "files": [
     "dist/",
-    "loader/"
+    "loader/",
+    "src/react/"
   ],
   "scripts": {
-    "build": "stencil build",
-    "start": "stencil build --dev --watch",
+    "build": "stencil build && npm run build:react",
+    "build:react": "tsc -p src/react/tsconfig.json",
+    "start": "stencil build --dev --watch --serve",
+    "dev:stencil": "stencil build --dev --watch --serve",
+    "dev:react": "cd examples/react-app && npm run dev",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",
+    "test:playwright": "playwright test",
+    "test:playwright:ui": "playwright test --ui",
     "generate": "stencil generate",
     "docs:dev": "npm run build && vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -22,16 +45,32 @@
   "dependencies": {
     "@stencil/core": "^4.29.1",
     "@tabler/icons-solidjs": "^3.34.1",
+    "@vaadin/combo-box": "^24.9.1",
     "@vaadin/vaadin-combo-box": "^23.6.1",
     "ai-wallet": "^0.0.2",
     "remotestorage-widget": "^1.7.0",
     "remotestoragejs": "^2.0.0-beta.7",
     "vite": "^7.0.5"
   },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "license": "MIT",
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
     "@tailwindcss/cli": "^4.1.3",
     "@tailwindcss/postcss": "^4.1.3",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "stencil-tailwind-plugin": "^2.0.3",
     "tailwindcss": "^4.1.3",
     "typescript": "^5.8.3",

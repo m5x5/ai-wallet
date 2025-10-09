@@ -25,7 +25,9 @@ export class ConnectRemotestorage {
   render() {
     return (
       <Host>
-        <remotestorage-widget open rs={this.rs}></remotestorage-widget>
+        <div class="pt-2 border-t border-gray-200 dark:border-zinc-700">
+          <remotestorage-widget open rs={this.rs}></remotestorage-widget>
+        </div>
       </Host>
     );
   }

@@ -17,11 +17,16 @@ export namespace Components {
         "getConfiguration": () => Promise<AIWalletConfig>;
         "getRemoteStorage": () => Promise<any>;
         "saveConfiguration": () => Promise<boolean>;
+        "setRemoteStorage": (rs: any) => Promise<void>;
         "subtitle": string;
         /**
           * @default true
          */
         "sync": boolean;
+        /**
+          * @default 'shadow'
+         */
+        "variant": 'shadow' | 'border';
     }
     interface ConnectRemotestorage {
         "rs": any;
@@ -73,6 +78,10 @@ declare namespace LocalJSX {
           * @default true
          */
         "sync"?: boolean;
+        /**
+          * @default 'shadow'
+         */
+        "variant"?: 'shadow' | 'border';
     }
     interface ConnectRemotestorage {
         "rs"?: any;
