@@ -678,6 +678,8 @@ export class AIWallet {
       this.enabledCapabilities = this.enabledCapabilities.includes(capabilityId)
         ? this.enabledCapabilities.filter((id) => id !== capabilityId)
         : [...this.enabledCapabilities, capabilityId];
+      // Force combo boxes to reinitialize so newly (re-)mounted fields get items and value
+      this.comboBoxesInitialized = false;
       this.emitConfigChange();
     };
 
